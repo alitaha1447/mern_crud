@@ -5,6 +5,7 @@ import axios from "axios";
 const TaskForm = ({ fetchTasks, selectedTask, setSelectedTask }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [image, setImage] = useState("");
   const [status, setStatus] = useState("");
 
   // Pre-fill form when a task is selected for update
@@ -16,7 +17,7 @@ const TaskForm = ({ fetchTasks, selectedTask, setSelectedTask }) => {
     } else {
       setTitle("");
       setDescription("");
-      setStatus("")
+      setStatus("");
     }
   }, [selectedTask]);
 
@@ -24,6 +25,12 @@ const TaskForm = ({ fetchTasks, selectedTask, setSelectedTask }) => {
     e.preventDefault();
     try {
       const token = localStorage.getItem("token");
+      const formData = new FormData();
+      formData.append("title", title);
+      formData.append("description", description);
+      if (image) {
+        formData.append("image", image); // Append the file object
+      }
       if (selectedTask) {
         // Update existing task
         await axios.put(
@@ -39,11 +46,17 @@ const TaskForm = ({ fetchTasks, selectedTask, setSelectedTask }) => {
         // Create new task
         await axios.post(
           `http://localhost:4000/api/task/createTask`,
-          { title, description },
-          { headers: { Authorization: `Bearer ${token}` } }
+          formData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "multipart/form-data", // Ensure the content type is set
+            },
+          }
         );
         setTitle("");
         setDescription("");
+        setImage("");
       }
       fetchTasks();
     } catch (err) {
@@ -137,6 +150,19 @@ const TaskForm = ({ fetchTasks, selectedTask, setSelectedTask }) => {
                   placeholder="Enter task description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="image" className="form-label">
+                  Select image
+                </label>
+                <input
+                  type="file"
+                  id="image"
+                  name="image" // Ensure the name matches the field expected by multer
+                  className="form-control"
+                  onChange={(e) => setImage(e.target.files[0])} // Set the file object
                   required
                 />
               </div>

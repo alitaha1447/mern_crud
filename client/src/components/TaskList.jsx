@@ -1,8 +1,11 @@
 // src/components/TaskList.js
-import React from "react";
+import React,{useState} from "react";
 import axios from "axios";
 
 const TaskList = ({ tasks, fetchTasks, setSelectedTask }) => {
+  // console.log('==',tasks)
+  const [searchQuery, setSearchQuery] = useState("");
+
   // Delete a task
   const handleDelete = async (id) => {
     try {
@@ -21,14 +24,32 @@ const TaskList = ({ tasks, fetchTasks, setSelectedTask }) => {
     setSelectedTask(task);
   };
 
+  // Handle search input change
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+    fetchTasks(e.target.value); // Fetch tasks based on search input dynamically
+  };
+  console.log(searchQuery)
   return (
     <div className="container mt-4">
-      <h2 className="mb-4">Task List</h2>
+       <div className="d-flex justify-content-between align-items-center mb-4">
+        <h2>Task List</h2>
+        <div className="w-25">
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Search tasks..."
+            value={searchQuery}
+            onChange={handleSearchChange}
+          />
+        </div>
+      </div>
       <table className="table table-striped table-bordered">
         <thead className="thead-dark">
           <tr>
             <th scope="col">Title</th>
             <th scope="col">Description</th>
+            <th scope="col">Image</th>
             <th scope="col">Status</th>
             <th scope="col">Actions</th>
           </tr>
@@ -39,6 +60,7 @@ const TaskList = ({ tasks, fetchTasks, setSelectedTask }) => {
               <tr key={task._id}>
                 <td>{task.title}</td>
                 <td>{task.description}</td>
+                <td><img src={`http://localhost:4000/${task.image}`} width={50} className="img-thumbnail" alt=""/></td>
                 <td>{task.status || "Pending"}</td>
                 <td>
                   <button
